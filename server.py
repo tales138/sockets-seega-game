@@ -3,6 +3,59 @@ import threading
 from game import SeegaGame
 
 
+""""
+socket: Para comunicação em rede.
+
+threading: Para permitir que múltiplos jogadores (clientes) se comuniquem com o servidor ao mesmo tempo.
+
+SeegaGame: Classe que representa a lógica do jogo (você implementou isso antes).
+
+
+HOST e PORT: O servidor vai escutar conexões em localhost:12345.
+
+clients: Lista com os sockets dos clientes conectados.
+
+player_names: Mapeia os jogadores 'A' e 'B' para seus nomes.
+
+lock: Garante que só uma thread acesse partes críticas do código (como ações do jogo) por vez.
+"""
+
+"""
+
+Durante o loop while True, o servidor processa os seguintes comandos enviados pelos clientes:
+---------------------------------------
+NAME <nome>
+Salva o nome do jogador e avisa os outros jogadores.
+
+----------------------------
+
+PLACE x y
+Posiciona uma peça no tabuleiro.
+
+Verifica se é o turno do jogador.
+
+Atualiza o jogo e transmite o novo estado para todos.
+
+--------------------------------------
+
+MOVE x1 y1 x2 y2
+Move uma peça.
+
+Verifica turno e validade da jogada.
+
+Atualiza o estado do jogo e transmite.
+
+Se alguém venceu, reinicia o jogo.
+
+----------------------------
+
+CHAT <mensagem>
+Envia uma mensagem para o chat global.
+----------------------------------
+
+RESTART
+Reinicia o jogo, voltando para a fase de colocação.
+"""
 HOST = 'localhost'
 PORT = 12345
 
@@ -35,13 +88,13 @@ def handle_client(conn, addr, pid):
             msg = data.decode().strip()
 
             with lock:
-                # Novo bloco para tratar o comando NAME
+                # COMANDO PARA NOME DO JOGADOR
                 if msg.startswith("NAME "):
                     name = msg[5:].strip()
                     player_names[player_symbol] = name
                     broadcast(f"PLAYER {player_symbol} {name}")
                     continue
-
+                # COMANDO PARA NOME COLOCAR AS PEÇAS
                 if msg.startswith("PLACE"):
                     if game.turn != pid:
                         conn.sendall("Não é seu turno.\n".encode())
@@ -57,7 +110,7 @@ def handle_client(conn, addr, pid):
                     conn.sendall((resp + "\n").encode())
                     if ok:
                         broadcast(f"PLACE {x} {y} {player_symbol}")
-
+                 # COMANDO PARA NOME MOVER AS PEÇAS
                 elif msg.startswith("MOVE"):
                     if game.turn != pid:
                         conn.sendall("Não é seu turno.\n".encode())
@@ -78,12 +131,12 @@ def handle_client(conn, addr, pid):
                             broadcast(f"CHAT Jogador {player_symbol} venceu!")
                             game.reset_game()
                             
-
+                #interacao com o chat
                 elif msg.startswith("CHAT"):
                     texto = msg[5:]
                     nome = player_names.get(player_symbol, f"Jogador {player_symbol}")
                     broadcast(f"CHAT {nome}: {texto}")
-
+                #restart jogo
                 elif msg == "RESTART":
                     game.reset_game()
                     broadcast("RESTART")

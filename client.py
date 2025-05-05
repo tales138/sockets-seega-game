@@ -191,7 +191,7 @@ class SeegaClient:
         elif ch == 'B':
             btn.config(text='●', fg='blue', state='normal')
         elif ch == 'X':
-            btn.config(text='⛔', fg='black', state='disabled')
+            btn.config(text='X', fg='black', state='disabled')
         else:
             btn.config(text='', fg='black', state='normal')
 

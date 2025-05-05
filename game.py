@@ -1,5 +1,35 @@
 
 class SeegaGame:
+    """
+    Classe que implementa a lógica do jogo Seega.
+
+    O jogo Seega é jogado em um tabuleiro 5x5, com duas fases:
+    - Fase de colocação: cada jogador coloca 12 peças (exceto na célula central bloqueada).
+    - Fase de movimentação: os jogadores alternam movimentos de suas peças, capturando peças adversárias.
+
+    A classe gerencia o estado do jogo, verifica regras de colocação, movimentação e captura,
+    controla o turno dos jogadores e permite verificar o vencedor ou desistência.
+
+    Atributos:
+        board (list[list[str]]): Representa o tabuleiro 5x5.
+        players (list[str]): Lista dos identificadores dos jogadores ('A' e 'B').
+        turn (int): Índice do jogador da vez (0 ou 1).
+        placement_phase (bool): Indica se ainda estamos na fase de colocação.
+        placement_count (list[int]): Contagem de peças colocadas por cada jogador.
+        captured_pieces (list[int]): Contagem de peças capturadas por cada jogador.
+        broadcast (callable): Função para notificar eventos externos (como remoções).
+
+    Métodos:
+        __init__(broadcast_fn): Inicializa o jogo com a função de broadcast.
+        reset_game(): Reinicia o estado do jogo.
+        get_board_string(): Retorna uma representação textual do tabuleiro (útil para debug).
+        valid_coords(x, y): Verifica se as coordenadas são válidas para jogadas.
+        place_piece(x, y): Realiza uma jogada de colocação de peça no tabuleiro.
+        move_piece(x1, y1, x2, y2): Move uma peça de (x1, y1) para (x2, y2), se permitido.
+        check_capture(x, y): Verifica e executa capturas ao redor da peça recém-movida.
+        check_winner(): Verifica se algum jogador venceu (sem peças no tabuleiro).
+        surrender(): Finaliza o jogo com desistência do jogador atual.
+    """
     def __init__(self,broadcast_fn):
         self.reset_game()
         self.broadcast = broadcast_fn
@@ -44,7 +74,7 @@ class SeegaGame:
         if self.placement_count[self.turn] >= 12:
             return False, "Você já colocou 12 peças."
         
-        # **Normalize e verifica ocupação usando strip()**
+        # ** e verifica ocupação usando strip()**
         cell = self.board[y][x]
         if cell.strip() != '':
             return False, "Espaço ocupado."
